@@ -22,7 +22,7 @@ const getUser = (userId) =>
     }
   });
 
-const getAllUser = () =>
+const getAllUsers = () =>
   new Promise(async (resolve, reject) => {
     try {
       const listUsers = await User.find();
@@ -85,7 +85,7 @@ const deleteUser = (userId) =>
 
 module.exports = {
   getUser,
-  getAllUser,
+  getAllUsers,
   updateUser,
   deleteUser,
 };

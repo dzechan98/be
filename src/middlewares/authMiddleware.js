@@ -27,7 +27,6 @@ const isAdmin = (req, res, next) => {
       message: "Require role is Admin",
     });
   }
-  console.log(req.user);
   next();
 };
 
