@@ -29,7 +29,7 @@ mongoose
     console.log("Connect DB success");
   })
   .catch((err) => {
-    clg(err);
+    console.log(err);
   });
 
 app.get("/", (req, res) => {

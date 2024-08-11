@@ -22,14 +22,22 @@ const getUser = (userId) =>
     }
   });
 
-const getAllUsers = () =>
+const getAllUsers = (page, limit) =>
   new Promise(async (resolve, reject) => {
     try {
-      const listUsers = await User.find();
+      const listUsers = await User.find()
+        .limit(limit)
+        .skip((page - 1) * limit);
+
+      const count = await User.countDocuments();
+      const totalPage = Math.ceil(count / limit);
 
       resolve({
         status: "OK",
-        data: listUsers,
+        results: {
+          data: listUsers,
+          totalPage,
+        },
       });
     } catch (error) {
       reject("An error occurred while fetching the users");

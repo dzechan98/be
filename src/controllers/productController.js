@@ -22,7 +22,9 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const result = await productService.getAllProducts();
+    const { page = 1, limit = 10 } = req.query;
+
+    const result = await productService.getAllProducts(page, limit);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({

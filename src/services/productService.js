@@ -20,16 +20,25 @@ const getProduct = (productId) =>
     }
   });
 
-const getAllProducts = () =>
+const getAllProducts = (page, limit) =>
   new Promise(async (resolve, reject) => {
     try {
-      const listProducts = await Product.find();
+      const listProducts = await Product.find()
+        .limit(limit)
+        .skip((page - 1) * limit);
+
+      const count = await Product.countDocuments();
+      const totalPage = Math.ceil(count / limit);
 
       resolve({
         status: "OK",
-        data: listProducts,
+        results: {
+          data: listProducts,
+          totalPage,
+        },
       });
     } catch (error) {
+      console.log(error);
       reject("An error occurred while fetching the products");
     }
   });

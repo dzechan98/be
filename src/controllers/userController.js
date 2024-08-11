@@ -22,7 +22,8 @@ const getUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const result = await userService.getAllUsers();
+    const { page = 1, limit = 10 } = req.query;
+    const result = await userService.getAllUsers(page, limit);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
