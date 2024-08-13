@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { default: mongoose } = require("mongoose");
+const cookieParser = require("cookie-parser");
 const routes = require("./routes");
 require("dotenv").config();
 
@@ -20,6 +21,7 @@ app.use(
     extended: true,
   })
 );
+app.use(cookieParser());
 
 routes(app);
 

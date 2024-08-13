@@ -52,8 +52,17 @@ const login = async (req, res) => {
     }
 
     const response = await authService.login({ email, password });
-    return res.status(200).json(response);
+    const { refreshToken, password: _, ...data } = response;
+
+    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+
+    return res.status(200).json({
+      status: "OK",
+      message: "SUCCESS",
+      data,
+    });
   } catch (error) {
+    console.log(error);
     let statusCode = 500;
     let message = "Internal server error";
 
@@ -73,16 +82,8 @@ const login = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(400).json({
-        message: "Authorization header is missing or malformed",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const response = await authService.refreshToken(token);
+    const refreshToken = req.cookies.refreshToken;
+    const response = await authService.refreshToken(refreshToken);
     return res.status(200).json(response);
   } catch (error) {
     if (error === "Refresh token may be expired or invalid") {

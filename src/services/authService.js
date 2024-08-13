@@ -25,7 +25,6 @@ const register = ({ email, password }) =>
 
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
-
       const createdUser = await User.create({
         email,
         password: hashPassword,
@@ -46,7 +45,7 @@ const register = ({ email, password }) =>
 const login = ({ email, password }) =>
   new Promise(async (resolve, reject) => {
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).select("+password");
 
       if (!user) {
         reject("The user is not defined");
@@ -63,25 +62,22 @@ const login = ({ email, password }) =>
         isAdmin: user.isAdmin,
       };
 
-      user.accessToken = generateToken(payload);
-      user.refreshToken = generateToken(payload, "RT");
-
-      await user.save();
-      const { password: _, ...data } = user.toObject();
+      const accessToken = generateToken(payload);
+      const refreshToken = generateToken(payload, "RT");
 
       resolve({
-        status: "OK",
-        message: "SUCCESS",
-        data,
+        ...user.toObject(),
+        accessToken,
+        refreshToken,
       });
     } catch (error) {
       reject("An error occurred while processing the request");
     }
   });
 
-const refreshToken = (token) =>
+const refreshToken = (refreshToken) =>
   new Promise(async (resolve, reject) => {
-    jwt.verify(token, process.env.JWT_RT_SECRET_KEY, (err, decode) => {
+    jwt.verify(refreshToken, process.env.JWT_RT_SECRET_KEY, (err, decode) => {
       if (err) {
         reject("Refresh token may be expired or invalid");
       }

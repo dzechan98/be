@@ -22,9 +22,21 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, sort = "asc" } = req.query;
+    const queryObj = { ...req.query };
+    const excludeFields = ["page", "limit", "sort", "filter"];
+    excludeFields.forEach((item) => delete queryObj[item]);
 
-    const result = await productService.getAllProducts(page, limit);
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    console.log(queryStr);
+    const result = await productService.getAllProducts(
+      page,
+      limit,
+      sort,
+      queryStr
+    );
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
@@ -35,17 +47,17 @@ const getAllProducts = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    const { name, image, type, price, countInStock, rating, description } =
+    const { title, price, description, quantity, category, brand, color } =
       req.body;
 
     if (
-      !name ||
-      !image ||
-      !type ||
+      !title ||
       !description ||
+      !category ||
+      !brand ||
+      !color ||
       price < 0 ||
-      countInStock < 0 ||
-      rating < 0
+      quantity < 0
     ) {
       return res.status(400).json({
         message: "Input is malformed",

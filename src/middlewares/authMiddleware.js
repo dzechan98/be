@@ -21,6 +21,20 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const isUserOrAdmin = (req, res, next) => {
+  const userId = req.params.id;
+  const { id, isAdmin } = req.user;
+
+  if (id !== userId && !isAdmin) {
+    return res.status(403).json({
+      message:
+        "Access denied. You do not have permission to perform this action.",
+    });
+  }
+
+  next();
+};
+
 const isAdmin = (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({
@@ -32,5 +46,6 @@ const isAdmin = (req, res, next) => {
 
 module.exports = {
   verifyToken,
+  isUserOrAdmin,
   isAdmin,
 };

@@ -11,11 +11,9 @@ const getUser = (userId) =>
         });
       }
 
-      const { password: _, isAdmin, ...data } = user.toObject();
-
       resolve({
         status: "OK",
-        data,
+        data: user,
       });
     } catch (error) {
       reject("An error occurred while fetching the user");
@@ -58,12 +56,10 @@ const updateUser = (userId, body) =>
         });
       }
 
-      const { password, ...data } = user.toObject();
-
       resolve({
         status: "OK",
         message: "Update user success",
-        data,
+        data: user,
       });
     } catch (error) {
       reject("An error occurred while updating the user");

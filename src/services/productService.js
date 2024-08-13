@@ -20,12 +20,13 @@ const getProduct = (productId) =>
     }
   });
 
-const getAllProducts = (page, limit) =>
+const getAllProducts = (page, limit, sort, filter) =>
   new Promise(async (resolve, reject) => {
     try {
-      const listProducts = await Product.find()
+      const listProducts = await Product.find(JSON.parse(filter))
         .limit(limit)
-        .skip((page - 1) * limit);
+        .skip((page - 1) * limit)
+        .sort({ price: sort });
 
       const count = await Product.countDocuments();
       const totalPage = Math.ceil(count / limit);
@@ -56,7 +57,6 @@ const addProduct = (newProduct) =>
         data: createProduct,
       });
     } catch (error) {
-      console.log(error);
       reject("An error occurred while processing the request");
     }
   });
