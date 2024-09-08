@@ -8,6 +8,7 @@ require("dotenv").config();
 const PORT = process.env.PORT || 3001;
 const app = express();
 
+app.use("/uploads", express.static("uploads"));
 app.use(
   cors({
     origin: process.env.CLIENT_URL,

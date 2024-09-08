@@ -56,11 +56,7 @@ const login = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
-    return res.status(200).json({
-      status: "OK",
-      message: "SUCCESS",
-      data,
-    });
+    return res.status(200).json({ data });
   } catch (error) {
     console.log(error);
     let statusCode = 500;

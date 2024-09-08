@@ -5,16 +5,10 @@ const getUser = (userId) =>
     try {
       const user = await User.findById(userId);
       if (!user) {
-        resolve({
-          status: "ERR",
-          message: "The user is not defined",
-        });
+        resolve({ message: "The user is not defined" });
       }
 
-      resolve({
-        status: "OK",
-        data: user,
-      });
+      resolve({ data: user });
     } catch (error) {
       reject("An error occurred while fetching the user");
     }
@@ -30,13 +24,7 @@ const getAllUsers = (page, limit) =>
       const count = await User.countDocuments();
       const totalPage = Math.ceil(count / limit);
 
-      resolve({
-        status: "OK",
-        results: {
-          data: listUsers,
-          totalPage,
-        },
-      });
+      resolve({ results: { data: listUsers, totalPage } });
     } catch (error) {
       reject("An error occurred while fetching the users");
     }
@@ -50,17 +38,10 @@ const updateUser = (userId, body) =>
       });
 
       if (!user) {
-        return resolve({
-          status: "ERR",
-          message: "The user is not defined",
-        });
+        return resolve({ message: "The user is not defined" });
       }
 
-      resolve({
-        status: "OK",
-        message: "Update user success",
-        data: user,
-      });
+      resolve({ message: "Update user success", data: user });
     } catch (error) {
       reject("An error occurred while updating the user");
     }
@@ -72,16 +53,10 @@ const deleteUser = (userId) =>
       const user = await User.findByIdAndDelete(userId);
 
       if (!user) {
-        return resolve({
-          status: "ERR",
-          message: "The user is not defined",
-        });
+        return resolve({ message: "The user is not defined" });
       }
 
-      resolve({
-        status: "OK",
-        message: "Delete user success",
-      });
+      resolve({ message: "Delete user success" });
     } catch (error) {
       reject("An error occurred while deleting the user");
     }

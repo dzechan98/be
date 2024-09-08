@@ -5,18 +5,24 @@ const getProduct = async (req, res) => {
     const productId = req.params.id;
 
     if (!productId) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The productId is required",
-      });
+      return res.status(400).json({ message: "The productId is required" });
     }
 
     const result = await productService.getProduct(productId);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "An error occurred while fetching the product",
-    });
+    let statusCode = 500;
+    let message = "Internal server error";
+
+    if (
+      error == "The product is not defined" ||
+      error == "An error occurred while fetching the product"
+    ) {
+      statusCode = 400;
+      message = error;
+    }
+
+    return res.status(statusCode).json({ message });
   }
 };
 
@@ -39,9 +45,7 @@ const getAllProducts = async (req, res) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "An error occurred while fetching the products",
-    });
+    return res.status(500).json({ message: error });
   }
 };
 
@@ -59,9 +63,7 @@ const addProduct = async (req, res) => {
       price < 0 ||
       quantity < 0
     ) {
-      return res.status(400).json({
-        message: "Input is malformed",
-      });
+      return res.status(400).json({ message: "Input is malformed" });
     }
 
     const result = await productService.addProduct(req.body);
@@ -84,10 +86,7 @@ const updateProduct = async (req, res) => {
     const productId = req.params.id;
 
     if (!productId) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The productId is required",
-      });
+      return res.status(400).json({ message: "The productId is required" });
     }
 
     if (
@@ -95,19 +94,20 @@ const updateProduct = async (req, res) => {
       req.body.rating < 0 ||
       req.body.price < 0
     ) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "Input is malformed",
-      });
+      return res.status(400).json({ message: "Input is malformed" });
     }
 
     const result = await productService.updateProduct(productId, req.body);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "";
+    let message = "Internal server error";
 
-    if ((error = "An error occurred while updating the product")) {
+    if (
+      (error =
+        "An error occurred while updating the product" ||
+        error == "The product is not defined")
+    ) {
       statusCode = 400;
       message = error;
     }
@@ -120,18 +120,23 @@ const deleteProduct = async (req, res) => {
     const productId = req.params.id;
 
     if (!productId) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The productId is required",
-      });
+      return res.status(400).json({ message: "The productId is required" });
     }
 
     const result = await productService.deleteProduct(productId);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "An error occurred while deleting the product",
-    });
+    let statusCode = 500;
+    let message = "Internal server error";
+
+    if (
+      error == "The product is not defined" ||
+      error == "An error occurred while deleting the product"
+    ) {
+      statusCode = 400;
+      message = error;
+    }
+    return res.status(500).json({ message });
   }
 };
 

@@ -32,11 +32,7 @@ const register = ({ email, password }) =>
 
       const { password: _, ...data } = createdUser.toObject();
 
-      resolve({
-        status: "OK",
-        message: "SUCCESS",
-        data,
-      });
+      resolve({ data });
     } catch (error) {
       reject("An error occurred while processing the request");
     }
@@ -88,11 +84,7 @@ const refreshToken = (refreshToken) =>
       });
 
       resolve({
-        status: "OK",
-        message: "SUCCESS",
-        data: {
-          accessToken,
-        },
+        data: { accessToken },
       });
     });
   });
