@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     let math = ["image/png", "image/jpeg", "image/jpg"];
     if (math.indexOf(file.mimetype) === -1) {
-      let errorMess = `The file <strong>${file.originalname}</strong> is invalid. Only allowed to upload image jpeg or png.`;
+      let errorMess = `Tệp <strong>${file.originalname}</strong> không hợp lệ. Chỉ được phép tải lên hình ảnh jpeg hoặc png.`;
       return cb(errorMess, null);
     }
 

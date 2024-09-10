@@ -5,17 +5,14 @@ const getUser = async (req, res) => {
     const userId = req.params.id;
 
     if (!userId) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The userId is required",
-      });
+      return res.status(400).json({ message: "userId là bắt buộc" });
     }
 
     const result = await userService.getUser(userId);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
-      message: "An error occurred while fetching the user",
+      message: "Đã xảy ra lỗi khi tìm nạp người dùng",
     });
   }
 };
@@ -27,7 +24,7 @@ const getAllUsers = async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
-      message: "An error occurred while fetching the users",
+      message: "Đã xảy ra lỗi khi tìm nạp danh sách người dùng",
     });
   }
 };
@@ -38,8 +35,7 @@ const updateUser = async (req, res) => {
 
     if (!userId) {
       return res.status(400).json({
-        status: "ERR",
-        message: "The userId is required",
+        message: "userId là bắt buộc",
       });
     }
 
@@ -47,7 +43,7 @@ const updateUser = async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
-      message: "An error occurred while updating the user",
+      message: "Đã xảy ra lỗi khi cập nhật người dùng",
     });
   }
 };
@@ -57,17 +53,14 @@ const deleteUser = async (req, res) => {
     const userId = req.params.id;
 
     if (!userId) {
-      return res.status(400).json({
-        status: "ERR",
-        message: "The userId is required",
-      });
+      return res.status(400).json({ message: "userId là bắt buộc" });
     }
 
     const result = await userService.deleteUser(userId);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
-      message: "An error occurred while deleting the user",
+      message: "Đã xảy ra lỗi khi xóa người dùng",
     });
   }
 };

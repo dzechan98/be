@@ -5,7 +5,7 @@ const verifyToken = (req, res, next) => {
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
-      message: "Authorization header is missing or malformed",
+      message: "Không được ủy quyền hoặc không đúng định dạng",
     });
   }
 
@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
   jwt.verify(accessToken, process.env.JWT_AT_SECRET_KEY, (err, decode) => {
     if (err) {
       return res.status(401).json({
-        message: "Access token may be expired or invalid",
+        message: "Access token có thể đã hết hạn hoặc không hợp lệ",
       });
     }
     req.user = decode;
@@ -28,7 +28,7 @@ const isUserOrAdmin = (req, res, next) => {
   if (id !== userId && !isAdmin) {
     return res.status(403).json({
       message:
-        "Access denied. You do not have permission to perform this action.",
+        "Truy cập bị từ chối. Bạn không có quyền thực hiện hành động này.",
     });
   }
 
@@ -38,7 +38,7 @@ const isUserOrAdmin = (req, res, next) => {
 const isAdmin = (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({
-      message: "Require role is Admin",
+      message: "Yêu cầu vai trò là Quản trị viên",
     });
   }
   next();

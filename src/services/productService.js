@@ -5,12 +5,12 @@ const getProduct = (productId) =>
     try {
       const product = await Product.findById(productId);
       if (!product) {
-        reject("The product is not defined");
+        reject("Sản phẩm không được xác định");
       }
 
-      resolve({ data: product });
+      resolve({ ...product.toObject() });
     } catch (error) {
-      reject("An error occurred while fetching the product");
+      reject("Đã xảy ra lỗi khi tìm nạp sản phẩm");
     }
   });
 
@@ -23,9 +23,8 @@ const getAllProducts = (page, limit, sort, filter) =>
         .sort({ price: sort });
 
       const count = await Product.countDocuments();
-      const totalPage = Math.ceil(count / limit);
 
-      resolve({ results: { data: listProducts, totalPage } });
+      resolve({ results: listProducts, count });
     } catch (error) {
       console.log(error);
       reject("An error occurred while fetching the products");
@@ -39,9 +38,9 @@ const addProduct = (newProduct) =>
         ...newProduct,
       });
 
-      resolve({ data: createProduct });
+      resolve({ ...createProduct.toObject() });
     } catch (error) {
-      reject("An error occurred while processing the request");
+      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
     }
   });
 
@@ -53,15 +52,14 @@ const updateProduct = (productId, body) =>
       });
 
       if (!product) {
-        return reject("The product is not defined");
+        return reject("Sản phẩm không được xác định");
       }
 
       resolve({
-        message: "Update product success",
-        data: product,
+        ...product.toObject(),
       });
     } catch (error) {
-      reject("An error occurred while updating the product");
+      reject("Đã xảy ra lỗi khi cập nhật sản phẩm");
     }
   });
 
@@ -71,12 +69,12 @@ const deleteProduct = (productId) =>
       const product = await Product.findByIdAndDelete(productId);
 
       if (!product) {
-        return reject("The product is not defined");
+        return reject("Sản phẩm không được xác định");
       }
 
       resolve({ message: "Delete product success" });
     } catch (error) {
-      reject("An error occurred while deleting the product");
+      reject("Đã xảy ra lỗi khi xóa sản phẩm");
     }
   });
 

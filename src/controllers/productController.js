@@ -5,18 +5,18 @@ const getProduct = async (req, res) => {
     const productId = req.params.id;
 
     if (!productId) {
-      return res.status(400).json({ message: "The productId is required" });
+      return res.status(400).json({ message: "productId là bắt buộc" });
     }
 
     const result = await productService.getProduct(productId);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
-      error == "The product is not defined" ||
-      error == "An error occurred while fetching the product"
+      error == "Sản phẩm không được xác định" ||
+      error == "Đã xảy ra lỗi khi tìm nạp sản phẩm"
     ) {
       statusCode = 400;
       message = error;
@@ -63,16 +63,16 @@ const addProduct = async (req, res) => {
       price < 0 ||
       quantity < 0
     ) {
-      return res.status(400).json({ message: "Input is malformed" });
+      return res.status(400).json({ message: "Đầu vào không đúng định dạng" });
     }
 
     const result = await productService.addProduct(req.body);
     return res.status(201).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
-    if (error === "An error occurred while processing the request") {
+    if (error === "Đã xảy ra lỗi khi xử lý yêu cầu") {
       statusCode = 400;
       message = error;
     }
@@ -86,7 +86,7 @@ const updateProduct = async (req, res) => {
     const productId = req.params.id;
 
     if (!productId) {
-      return res.status(400).json({ message: "The productId is required" });
+      return res.status(400).json({ message: "productId là bắt buộc" });
     }
 
     if (
@@ -94,19 +94,19 @@ const updateProduct = async (req, res) => {
       req.body.rating < 0 ||
       req.body.price < 0
     ) {
-      return res.status(400).json({ message: "Input is malformed" });
+      return res.status(400).json({ message: "Đầu vào không đúng định dạng" });
     }
 
     const result = await productService.updateProduct(productId, req.body);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
       (error =
-        "An error occurred while updating the product" ||
-        error == "The product is not defined")
+        "Đã xảy ra lỗi khi cập nhật sản phẩm" ||
+        error == "Sản phẩm không được xác định")
     ) {
       statusCode = 400;
       message = error;
@@ -120,18 +120,18 @@ const deleteProduct = async (req, res) => {
     const productId = req.params.id;
 
     if (!productId) {
-      return res.status(400).json({ message: "The productId is required" });
+      return res.status(400).json({ message: "productId là bắt buộc" });
     }
 
     const result = await productService.deleteProduct(productId);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
-      error == "The product is not defined" ||
-      error == "An error occurred while deleting the product"
+      error == "Sản phẩm không được xác định" ||
+      error == "Đã xảy ra lỗi khi xóa sản phẩm"
     ) {
       statusCode = 400;
       message = error;

@@ -5,18 +5,18 @@ const getCategory = async (req, res) => {
     const categoryId = req.params.id;
 
     if (!categoryId) {
-      return res.status(400).json({ message: "The categoryId is required" });
+      return res.status(400).json({ message: "categoryId là bắt buộc" });
     }
 
     const result = await categoryService.getCategory(categoryId);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
-      error == "The category is not defined" ||
-      error == "An error occurred while fetching the category"
+      error == "Danh mục không được xác định" ||
+      error == "Đã xảy ra lỗi khi tìm nạp danh mục"
     ) {
       statusCode = 400;
       message = error;
@@ -28,12 +28,13 @@ const getCategory = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
   try {
+    console.log(req.query);
     const { page = 1, limit = 10 } = req.query;
     const result = await categoryService.getAllCategories(page, limit);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
-      message: "An error occurred while fetching the categories",
+      message: "Đã xảy ra lỗi khi tìm nạp danh sách danh mục",
     });
   }
 };
@@ -41,26 +42,21 @@ const getAllCategories = async (req, res) => {
 const addCategory = async (req, res) => {
   try {
     const { title } = req.body;
-    const image_url = req.file.path;
-    const slug = title.toLowerCase().split(" ").join("-");
+    const image_url = `${req.protocol}://${req.get("host")}/${req.file.path}`;
 
     if (!title) {
       return res.status(400).json({
-        message: "Input is malformed",
+        message: "Đầu vào không đúng định dạng",
       });
     }
 
-    const result = await categoryService.addCategory({
-      title,
-      image_url,
-      slug,
-    });
+    const result = await categoryService.addCategory({ title, image_url });
     return res.status(201).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
-    if (error === "An error occurred while processing the request") {
+    if (error === "Đã xảy ra lỗi khi xử lý yêu cầu") {
       statusCode = 400;
       message = error;
     }
@@ -74,24 +70,27 @@ const updateCategory = async (req, res) => {
     const categoryId = req.params.id;
 
     if (!categoryId) {
-      return res.status(400).json({ message: "The categoryId is required" });
+      return res.status(400).json({ message: "categoryId là bắt buộc" });
     }
 
-    const image_url = req.file.path || "";
-    const { title } = req.body;
-    const slug = title ? title.toLowerCase().split(" ").join("-") : "";
-    const data = slug ? { title, slug, image_url } : { image_url, ...req.body };
+    const url = `${req.protocol}://${req.get("host")}/${req.file.path}`;
+    const image_url = req.file.path ? url : "";
 
-    const result = await categoryService.updateCategory(categoryId, data);
+    const { title } = req.body;
+
+    const result = await categoryService.updateCategory(categoryId, {
+      title,
+      image_url,
+    });
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
       (error =
-        "An error occurred while updating the category" ||
-        error == "The category is not defined")
+        "Đã xảy ra lỗi khi cập nhật danh mục" ||
+        error == "Danh mục không được xác định")
     ) {
       statusCode = 400;
       message = error;
@@ -105,18 +104,18 @@ const deleteCategory = async (req, res) => {
     const categoryId = req.params.id;
 
     if (!categoryId) {
-      return res.status(400).json({ message: "The categoryId is required" });
+      return res.status(400).json({ message: "categoryId là bắt buộc" });
     }
 
     const result = await categoryService.deleteCategory(categoryId);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
-      error == "The category is not defined" ||
-      error == "An error occurred while deleting the category"
+      error == "Danh mục không được xác định" ||
+      error == "Đã xảy ra lỗi khi xóa danh mục"
     ) {
       statusCode = 400;
       message = error;

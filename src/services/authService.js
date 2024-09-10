@@ -20,7 +20,7 @@ const register = ({ email, password }) =>
       const checkUser = await User.findOne({ email });
 
       if (checkUser) {
-        reject("The email is already registered");
+        reject("Email đã được đăng ký");
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -30,11 +30,9 @@ const register = ({ email, password }) =>
         password: hashPassword,
       });
 
-      const { password: _, ...data } = createdUser.toObject();
-
-      resolve({ data });
+      resolve({ ...createdUser.toObject() });
     } catch (error) {
-      reject("An error occurred while processing the request");
+      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
     }
   });
 
@@ -44,13 +42,13 @@ const login = ({ email, password }) =>
       const user = await User.findOne({ email }).select("+password");
 
       if (!user) {
-        reject("The user is not defined");
+        reject("Người dùng không được xác định");
       }
 
       const comparePassword = await bcrypt.compare(password, user.password);
 
       if (!comparePassword) {
-        reject("Password does not match");
+        reject("Mật khẩu không khớp");
       }
 
       const payload = {
@@ -67,7 +65,7 @@ const login = ({ email, password }) =>
         refreshToken,
       });
     } catch (error) {
-      reject("An error occurred while processing the request");
+      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
     }
   });
 
@@ -75,7 +73,7 @@ const refreshToken = (refreshToken) =>
   new Promise(async (resolve, reject) => {
     jwt.verify(refreshToken, process.env.JWT_RT_SECRET_KEY, (err, decode) => {
       if (err) {
-        reject("Refresh token may be expired or invalid");
+        reject("Refresh token có thể hết hạn hoặc không hợp lệ");
       }
 
       const accessToken = generateToken({

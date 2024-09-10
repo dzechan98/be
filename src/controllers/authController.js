@@ -8,14 +8,14 @@ const register = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email and password are required",
+        message: "Email và mật khẩu là bắt buộc",
       });
     }
 
     const isCheckEmail = regex.test(email);
     if (!isCheckEmail) {
       return res.status(400).json({
-        message: "Email is invalid",
+        message: "Email không hợp lệ",
       });
     }
 
@@ -23,9 +23,9 @@ const register = async (req, res) => {
     return res.status(201).json(response);
   } catch (error) {
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
-    if (error === "The email is already registered") {
+    if (error === "Email đã được đăng ký") {
       statusCode = 409;
       message = error;
     }
@@ -40,34 +40,34 @@ const login = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email and password are required",
+        message: "Email và mật khẩu là bắt buộc",
       });
     }
 
     const isCheckEmail = regex.test(email);
     if (!isCheckEmail) {
       return res.status(400).json({
-        message: "Email is invalid",
+        message: "Email không hợp lệ",
       });
     }
 
     const response = await authService.login({ email, password });
-    const { refreshToken, password: _, ...data } = response;
+    const { refreshToken, ...data } = response;
 
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
-    return res.status(200).json({ data });
+    return res.status(200).json(response);
   } catch (error) {
     console.log(error);
     let statusCode = 500;
-    let message = "Internal server error";
+    let message = "Lỗi máy chủ";
 
     if (
-      error === "The user is not defined" ||
-      error === "Password does not match"
+      error === "Người dùng không được xác định" ||
+      error === "Mật khẩu không khớp"
     ) {
-      statusCode = 401;
-      message = "Invalid email or password";
+      statusCode = 400;
+      message = "Email hoặc mật khẩu không chính xác";
     }
 
     return res.status(statusCode).json({
@@ -82,13 +82,13 @@ const refreshToken = async (req, res) => {
     const response = await authService.refreshToken(refreshToken);
     return res.status(200).json(response);
   } catch (error) {
-    if (error === "Refresh token may be expired or invalid") {
+    if (error === "Refresh token có thể hết hạn hoặc không hợp lệ") {
       return res.status(401).json({
         message: error,
       });
     }
     return res.status(500).json({
-      message: "Internal server error",
+      message: "Lỗi máy chủ",
     });
   }
 };

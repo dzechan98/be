@@ -5,12 +5,12 @@ const getCategory = (categoryId) =>
     try {
       const category = await Category.findById(categoryId);
       if (!category) {
-        resolve({ message: "The category is not defined" });
+        resolve({ message: "Danh mục không được xác định" });
       }
 
-      resolve({ data: category });
+      resolve({ ...category.toObject() });
     } catch (error) {
-      reject("An error occurred while fetching the category");
+      reject("Đã xảy ra lỗi khi tìm nạp danh mục");
     }
   });
 
@@ -22,11 +22,10 @@ const getAllCategories = (page, limit) =>
         .skip((page - 1) * limit);
 
       const count = await Category.countDocuments();
-      const totalPage = Math.ceil(count / limit);
 
-      resolve({ results: { data: listCategories, totalPage } });
+      resolve({ results: listCategories, count });
     } catch (error) {
-      reject("An error occurred while fetching the categories");
+      reject("Đã xảy ra lỗi khi tìm nạp danh sách danh mục");
     }
   });
 
@@ -35,32 +34,29 @@ const addCategory = (newCategory) =>
     try {
       const createCategory = await Category.create({ ...newCategory });
 
-      resolve({ data: createCategory });
+      resolve({ ...createCategory.toObject() });
     } catch (error) {
       console.log(error);
-      reject("An error occurred while processing the request");
+      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
     }
   });
 
 const updateCategory = (categoryId, body) =>
   new Promise(async (resolve, reject) => {
     try {
-      const { image_url, ...rest } = body;
-      const data = image_url ? body : rest;
+      const { image_url, title } = body;
+      const data = image_url ? body : { title };
       const category = await Category.findByIdAndUpdate(categoryId, data, {
         new: true,
       });
 
       if (!category) {
-        return resolve({ message: "The category is not defined" });
+        return resolve("Danh mục không được xác định");
       }
 
-      resolve({
-        message: "Update category success",
-        data: category,
-      });
+      resolve({ ...category.toObject() });
     } catch (error) {
-      reject("An error occurred while updating the category");
+      reject("Đã xảy ra lỗi khi cập nhật danh mục");
     }
   });
 
@@ -70,12 +66,12 @@ const deleteCategory = (categoryId) =>
       const category = await Category.findByIdAndDelete(categoryId);
 
       if (!category) {
-        return resolve({ message: "The category is not defined" });
+        return resolve({ message: "Danh mục không được xác định" });
       }
 
       resolve({ message: "Delete category success" });
     } catch (error) {
-      reject("An error occurred while deleting the category");
+      reject("Đã xảy ra lỗi khi xóa danh mục");
     }
   });
 

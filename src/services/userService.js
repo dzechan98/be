@@ -5,12 +5,12 @@ const getUser = (userId) =>
     try {
       const user = await User.findById(userId);
       if (!user) {
-        resolve({ message: "The user is not defined" });
+        resolve({ message: "Người dùng không được xác định" });
       }
 
-      resolve({ data: user });
+      resolve({ ...user.toObject() });
     } catch (error) {
-      reject("An error occurred while fetching the user");
+      reject("Đã xảy ra lỗi khi tìm nạp người dùng");
     }
   });
 
@@ -22,11 +22,10 @@ const getAllUsers = (page, limit) =>
         .skip((page - 1) * limit);
 
       const count = await User.countDocuments();
-      const totalPage = Math.ceil(count / limit);
 
-      resolve({ results: { data: listUsers, totalPage } });
+      resolve({ results: listUsers, count });
     } catch (error) {
-      reject("An error occurred while fetching the users");
+      reject("Đã xảy ra lỗi khi tìm nạp danh sách người dùng");
     }
   });
 
@@ -38,12 +37,12 @@ const updateUser = (userId, body) =>
       });
 
       if (!user) {
-        return resolve({ message: "The user is not defined" });
+        return resolve({ message: "Người dùng không được xác định" });
       }
 
-      resolve({ message: "Update user success", data: user });
+      resolve({ ...user.toObject() });
     } catch (error) {
-      reject("An error occurred while updating the user");
+      reject("Đã xảy ra lỗi khi cập nhật người dùng");
     }
   });
 
@@ -53,12 +52,12 @@ const deleteUser = (userId) =>
       const user = await User.findByIdAndDelete(userId);
 
       if (!user) {
-        return resolve({ message: "The user is not defined" });
+        return resolve({ message: "Người dùng không được xác định" });
       }
 
       resolve({ message: "Delete user success" });
     } catch (error) {
-      reject("An error occurred while deleting the user");
+      reject("Đã xảy ra lỗi khi xóa người dùng");
     }
   });
 
