@@ -3,7 +3,7 @@ const Product = require("../models/productModel");
 const getProduct = (productId) =>
   new Promise(async (resolve, reject) => {
     try {
-      const product = await Product.findById(productId);
+      const product = await Product.findById(productId).populate("category");
       if (!product) {
         reject("Sản phẩm không được xác định");
       }
@@ -14,13 +14,15 @@ const getProduct = (productId) =>
     }
   });
 
-const getAllProducts = (page, limit, sort, filter) =>
+const getAllProducts = (page, limit, filter) =>
   new Promise(async (resolve, reject) => {
+    const { id, ...rest } = JSON.parse(filter);
+    const input = id ? { _id: { $ne: id }, ...rest } : { ...rest };
     try {
-      const listProducts = await Product.find(JSON.parse(filter))
+      const listProducts = await Product.find(input)
+        .populate("category")
         .limit(limit)
-        .skip((page - 1) * limit)
-        .sort({ price: sort });
+        .skip((page - 1) * limit);
 
       const count = await Product.countDocuments();
 
@@ -38,7 +40,9 @@ const addProduct = (newProduct) =>
         ...newProduct,
       });
 
-      resolve({ ...createProduct.toObject() });
+      const product = await createProduct.populate("category");
+
+      resolve({ ...product.toObject() });
     } catch (error) {
       reject("Đã xảy ra lỗi khi xử lý yêu cầu");
     }
@@ -49,7 +53,7 @@ const updateProduct = (productId, body) =>
     try {
       const product = await Product.findByIdAndUpdate(productId, body, {
         new: true,
-      });
+      }).populate("category");
 
       if (!product) {
         return reject("Sản phẩm không được xác định");

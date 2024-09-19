@@ -8,6 +8,7 @@ const {
 } = require("../middlewares/authMiddleware");
 
 router.get("/:id", verifyToken, isUserOrAdmin, userController.getUser);
+router.get("/profile/me", verifyToken, userController.getMe);
 router.get("/", verifyToken, isAdmin, userController.getAllUsers);
 router.put("/:id", verifyToken, isUserOrAdmin, userController.updateUser);
 router.delete("/:id", verifyToken, isUserOrAdmin, userController.deleteUser);

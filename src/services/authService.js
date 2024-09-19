@@ -14,7 +14,7 @@ const generateToken = (data, type = "AT") => {
   });
 };
 
-const register = ({ email, password }) =>
+const register = ({ email, password, name }) =>
   new Promise(async (resolve, reject) => {
     try {
       const checkUser = await User.findOne({ email });
@@ -28,9 +28,18 @@ const register = ({ email, password }) =>
       const createdUser = await User.create({
         email,
         password: hashPassword,
+        name,
       });
 
-      resolve({ ...createdUser.toObject() });
+      const payload = {
+        id: createdUser._id,
+        isAdmin: createdUser.isAdmin,
+      };
+
+      const accessToken = generateToken(payload);
+      const refreshToken = generateToken(payload, "RT");
+
+      resolve({ accessToken, refreshToken });
     } catch (error) {
       reject("Đã xảy ra lỗi khi xử lý yêu cầu");
     }
@@ -52,7 +61,7 @@ const login = ({ email, password }) =>
       }
 
       const payload = {
-        id: user.id,
+        id: user._id,
         isAdmin: user.isAdmin,
       };
 
@@ -60,7 +69,6 @@ const login = ({ email, password }) =>
       const refreshToken = generateToken(payload, "RT");
 
       resolve({
-        ...user.toObject(),
         accessToken,
         refreshToken,
       });

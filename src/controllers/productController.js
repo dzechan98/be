@@ -28,21 +28,16 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, sort = "asc" } = req.query;
+    const { page = 1, limit = 10 } = req.query;
     const queryObj = { ...req.query };
-    const excludeFields = ["page", "limit", "sort", "filter"];
+    const excludeFields = ["page", "limit", "filter"];
     excludeFields.forEach((item) => delete queryObj[item]);
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
     console.log(queryStr);
-    const result = await productService.getAllProducts(
-      page,
-      limit,
-      sort,
-      queryStr
-    );
+    const result = await productService.getAllProducts(page, limit, queryStr);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({ message: error });
@@ -51,16 +46,25 @@ const getAllProducts = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    const { title, price, description, quantity, category, brand, color } =
-      req.body;
+    const {
+      title,
+      price,
+      description,
+      quantity,
+      category,
+      color,
+      images,
+      image_thumbnail,
+    } = req.body;
 
     if (
       !title ||
       !description ||
       !category ||
-      !brand ||
       !color ||
       price < 0 ||
+      !image_thumbnail ||
+      images.length < 0 ||
       quantity < 0
     ) {
       return res.status(400).json({ message: "Đầu vào không đúng định dạng" });
@@ -89,10 +93,26 @@ const updateProduct = async (req, res) => {
       return res.status(400).json({ message: "productId là bắt buộc" });
     }
 
+    const {
+      title,
+      price,
+      description,
+      quantity,
+      category,
+      color,
+      images,
+      image_thumbnail,
+    } = req.body;
+
     if (
-      req.body.countInStock < 0 ||
-      req.body.rating < 0 ||
-      req.body.price < 0
+      !title ||
+      !description ||
+      !category ||
+      !color ||
+      price < 0 ||
+      !image_thumbnail ||
+      images.length < 0 ||
+      quantity < 0
     ) {
       return res.status(400).json({ message: "Đầu vào không đúng định dạng" });
     }

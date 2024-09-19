@@ -13,6 +13,7 @@ const productSchema = new mongoose.Schema(
     sold: { type: Number, default: 0 },
     quantity: { type: Number, required: true },
     color: { type: String, required: true },
+    image_thumbnail: { type: String },
     images: { type: Array },
     ratings: [
       {
@@ -21,7 +22,11 @@ const productSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: false, versionKey: false },
+    toObject: { virtuals: false, versionKey: false },
+  }
 );
 
 const Product = mongoose.model("Product", productSchema);

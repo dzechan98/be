@@ -19,7 +19,7 @@ const register = async (req, res) => {
       });
     }
 
-    const response = await authService.register({ email, password });
+    const response = await authService.register(req.body);
     return res.status(201).json(response);
   } catch (error) {
     let statusCode = 500;
@@ -52,9 +52,8 @@ const login = async (req, res) => {
     }
 
     const response = await authService.login({ email, password });
-    const { refreshToken, ...data } = response;
 
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    res.cookie("refreshToken", response.refreshToken, { httpOnly: true });
 
     return res.status(200).json(response);
   } catch (error) {

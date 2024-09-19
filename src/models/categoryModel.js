@@ -12,7 +12,11 @@ const categorySchema = new mongoose.Schema(
     slug: { type: String, required: false },
     image_url: { type: String, required: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: false, versionKey: false },
+    toObject: { virtuals: false, versionKey: false },
+  }
 );
 
 categorySchema.pre("save", function (next) {

@@ -11,9 +11,35 @@ const getUser = async (req, res) => {
     const result = await userService.getUser(userId);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "Đã xảy ra lỗi khi tìm nạp người dùng",
-    });
+    let message = "Lỗi máy chủ";
+    let statusCode = 500;
+    if (error == "Đã xảy ra lỗi khi tìm nạp người dùng") {
+      statusCode = 400;
+      message = error;
+    }
+    return res.status(statusCode).json({ message });
+  }
+};
+
+const getMe = async (req, res) => {
+  console.log(req.user);
+  try {
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId là bắt buộc" });
+    }
+
+    const result = await userService.getUser(userId);
+    return res.status(200).json(result);
+  } catch (error) {
+    let message = "Lỗi máy chủ";
+    let statusCode = 500;
+    if (error == "Đã xảy ra lỗi khi tìm nạp người dùng") {
+      statusCode = 400;
+      message = error;
+    }
+    return res.status(statusCode).json(message);
   }
 };
 
@@ -67,6 +93,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   getUser,
+  getMe,
   getAllUsers,
   updateUser,
   deleteUser,
