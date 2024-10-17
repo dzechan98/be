@@ -7,7 +7,10 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, select: false },
     isAdmin: { type: Boolean, default: false, required: false },
     image: { type: String, required: false },
+    birthday: { type: String, required: false },
     phone: { type: String, required: false },
+    gender: { type: String, required: false },
+    address: { type: String, required: false },
   },
   {
     timestamps: true,

@@ -20,12 +20,9 @@ const categorySchema = new mongoose.Schema(
 );
 
 categorySchema.pre("save", function (next) {
-  this.slug = this.title.split(" ").join("-");
-  next();
-});
-
-categorySchema.pre("findOneAndUpdate", function (next) {
-  this.slug = this.title.split(" ").join("-");
+  if (this.isModified("title")) {
+    this.slug = this.title.split(" ").join("-");
+  }
   next();
 });
 

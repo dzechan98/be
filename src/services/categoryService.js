@@ -43,12 +43,15 @@ const addCategory = (newCategory) =>
 
 const updateCategory = (categoryId, body) =>
   new Promise(async (resolve, reject) => {
+    const slug = body?.title.split(" ").join("-");
     try {
-      const { image_url, title } = body;
-      const data = image_url ? body : { title };
-      const category = await Category.findByIdAndUpdate(categoryId, data, {
-        new: true,
-      });
+      const category = await Category.findByIdAndUpdate(
+        categoryId,
+        { ...body, slug },
+        {
+          new: true,
+        }
+      );
 
       if (!category) {
         return resolve("Danh mục không được xác định");
@@ -56,6 +59,7 @@ const updateCategory = (categoryId, body) =>
 
       resolve({ ...category.toObject() });
     } catch (error) {
+      console.log({ error });
       reject("Đã xảy ra lỗi khi cập nhật danh mục");
     }
   });

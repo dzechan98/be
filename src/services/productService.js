@@ -5,7 +5,7 @@ const getProduct = (productId) =>
     try {
       const product = await Product.findById(productId).populate("category");
       if (!product) {
-        reject("Sản phẩm không được xác định");
+        return reject("Sản phẩm không được xác định");
       }
 
       resolve({ ...product.toObject() });
@@ -14,17 +14,36 @@ const getProduct = (productId) =>
     }
   });
 
-const getAllProducts = (page, limit, filter) =>
+const getAllProducts = (
+  page,
+  limit,
+  filter,
+  sortPrice,
+  title,
+  listCategories
+) =>
   new Promise(async (resolve, reject) => {
     const { id, ...rest } = JSON.parse(filter);
-    const input = id ? { _id: { $ne: id }, ...rest } : { ...rest };
+    let input = id ? { _id: { $ne: id }, ...rest } : { ...rest };
+
+    input = title
+      ? { ...input, title: { $regex: title, $options: "i" } }
+      : input;
+
+    input = listCategories
+      ? { ...input, category: { $in: listCategories.split(",") } }
+      : input;
+
+    const sort = sortPrice ? { price: sortPrice } : { createdAt: -1 };
+
     try {
       const listProducts = await Product.find(input)
         .populate("category")
+        .sort(sort)
         .limit(limit)
         .skip((page - 1) * limit);
 
-      const count = await Product.countDocuments();
+      const count = await Product.find(input).countDocuments();
 
       resolve({ results: listProducts, count });
     } catch (error) {

@@ -1,5 +1,7 @@
 const userService = require("../services/userService");
 
+const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
 const getUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -22,7 +24,6 @@ const getUser = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
-  console.log(req.user);
   try {
     const userId = req.user.id;
 
@@ -52,6 +53,38 @@ const getAllUsers = async (req, res) => {
     return res.status(500).json({
       message: "Đã xảy ra lỗi khi tìm nạp danh sách người dùng",
     });
+  }
+};
+
+const addUser = async (req, res) => {
+  try {
+    const { name, password, image, phone, email, gender, address } = req.body;
+
+    if (!name || !password || !image || !email) {
+      return res.status(400).json({
+        message: "Đầu vào không đúng định dạng",
+      });
+    }
+
+    const isCheckEmail = regex.test(email);
+    if (!isCheckEmail) {
+      return res.status(400).json({
+        message: "Email không hợp lệ",
+      });
+    }
+
+    const result = await userService.addUser(req.body);
+    return res.status(201).json(result);
+  } catch (error) {
+    let statusCode = 500;
+    let message = "Lỗi máy chủ";
+
+    if (error === "Email đã được đăng ký") {
+      statusCode = 409;
+      message = error;
+    }
+
+    return res.status(statusCode).json({ message });
   }
 };
 
@@ -95,6 +128,7 @@ module.exports = {
   getUser,
   getMe,
   getAllUsers,
+  addUser,
   updateUser,
   deleteUser,
 };

@@ -28,40 +28,55 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortPrice,
+      title,
+      listCategories,
+    } = req.query;
     const queryObj = { ...req.query };
-    const excludeFields = ["page", "limit", "filter"];
+    const excludeFields = [
+      "page",
+      "limit",
+      "title",
+      "sortPrice",
+      "listCategories",
+    ];
     excludeFields.forEach((item) => delete queryObj[item]);
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    console.log(queryStr);
-    const result = await productService.getAllProducts(page, limit, queryStr);
+    // console.log(queryStr);
+
+    // const categoryArray = Array.isArray(listCategories)
+    //   ? listCategories
+    //   : listCategories.split(",");
+    const result = await productService.getAllProducts(
+      page,
+      limit,
+      queryStr,
+      sortPrice,
+      title,
+      listCategories
+    );
+
     return res.status(200).json(result);
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: error });
   }
 };
 
 const addProduct = async (req, res) => {
   try {
-    const {
-      title,
-      price,
-      description,
-      quantity,
-      category,
-      color,
-      images,
-      image_thumbnail,
-    } = req.body;
+    const { title, price, quantity, category, images, image_thumbnail } =
+      req.body;
 
     if (
       !title ||
-      !description ||
       !category ||
-      !color ||
       price < 0 ||
       !image_thumbnail ||
       images.length < 0 ||
@@ -93,22 +108,12 @@ const updateProduct = async (req, res) => {
       return res.status(400).json({ message: "productId là bắt buộc" });
     }
 
-    const {
-      title,
-      price,
-      description,
-      quantity,
-      category,
-      color,
-      images,
-      image_thumbnail,
-    } = req.body;
+    const { title, price, quantity, category, images, image_thumbnail } =
+      req.body;
 
     if (
       !title ||
-      !description ||
       !category ||
-      !color ||
       price < 0 ||
       !image_thumbnail ||
       images.length < 0 ||

@@ -28,7 +28,6 @@ const getCategory = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
   try {
-    console.log(req.query);
     const { page = 1, limit = 10 } = req.query;
     const result = await categoryService.getAllCategories(page, limit);
     return res.status(200).json(result);
@@ -41,10 +40,9 @@ const getAllCategories = async (req, res) => {
 
 const addCategory = async (req, res) => {
   try {
-    const { title } = req.body;
-    const image_url = `${req.protocol}://${req.get("host")}/${req.file.path}`;
+    const { title, image_url } = req.body;
 
-    if (!title) {
+    if (!title || !image_url) {
       return res.status(400).json({
         message: "Đầu vào không đúng định dạng",
       });
@@ -73,15 +71,7 @@ const updateCategory = async (req, res) => {
       return res.status(400).json({ message: "categoryId là bắt buộc" });
     }
 
-    const url = `${req.protocol}://${req.get("host")}/${req.file.path}`;
-    const image_url = req.file.path ? url : "";
-
-    const { title } = req.body;
-
-    const result = await categoryService.updateCategory(categoryId, {
-      title,
-      image_url,
-    });
+    const result = await categoryService.updateCategory(categoryId, req.body);
     return res.status(200).json(result);
   } catch (error) {
     let statusCode = 500;
