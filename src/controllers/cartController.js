@@ -20,7 +20,6 @@ const getCart = async (req, res) => {
 const addItem = async (req, res) => {
   try {
     const product = req.body;
-    console.log(product, req.user.id);
     const cart = await cartService.addItemToCart(req.user.id, product);
     res.status(200).json(cart);
   } catch (error) {
@@ -112,6 +111,7 @@ const removeItem = async (req, res) => {
 };
 
 const clearCart = async (req, res) => {
+  console.log(req);
   try {
     const cart = await cartService.clearCart(req.user.id);
     res.status(200).json(cart);

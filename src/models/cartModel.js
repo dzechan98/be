@@ -10,6 +10,9 @@ const CartItemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  color: {
+    type: String,
+  },
   price: {
     type: Number,
     required: true,
@@ -34,11 +37,6 @@ const CartSchema = new mongoose.Schema(
       unique: true,
     },
     items: [CartItemSchema],
-    totalPrice: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
   },
   {
     timestamps: true,

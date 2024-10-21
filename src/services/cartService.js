@@ -6,7 +6,7 @@ const getCartByUserId = (userId) =>
     try {
       let cart = await Cart.findOne({ userId });
       if (!cart) {
-        cart = await Cart.create({ userId, items: [], totalPrice: 0 });
+        cart = await Cart.create({ userId, items: [] });
       }
       resolve(cart);
     } catch (error) {
@@ -41,7 +41,6 @@ const addItemToCart = (userId, product) =>
         cart.items.push(product);
       }
 
-      cart.totalPrice = calculateTotalPrice(cart.items);
       await cart.save();
 
       resolve(cart);
@@ -69,7 +68,6 @@ const decrementItemInCart = (userId, productId) =>
         existingItem.quantity -= 1;
       }
 
-      cart.totalPrice = calculateTotalPrice(cart.items);
       await cart.save();
 
       resolve(cart);
@@ -102,7 +100,6 @@ const incrementItemInCart = (userId, productId) =>
       }
 
       existingItem.quantity += 1;
-      cart.totalPrice = calculateTotalPrice(cart.items);
       await cart.save();
 
       resolve(cart);
@@ -123,7 +120,6 @@ const removeItemFromCart = (userId, productId) =>
         cart.items = cart.items.filter(
           (item) => item.productId.toString() !== productId
         );
-        cart.totalPrice = calculateTotalPrice(cart.items);
         await cart.save();
       }
 
@@ -138,7 +134,7 @@ const clearCart = (userId) =>
     try {
       const cart = await Cart.findOneAndUpdate(
         { userId },
-        { items: [], totalPrice: 0 },
+        { items: [] },
         { new: true }
       );
 
@@ -147,10 +143,6 @@ const clearCart = (userId) =>
       reject("Đã xảy ra lỗi khi xóa giỏ hàng");
     }
   });
-
-const calculateTotalPrice = (items) => {
-  return items.reduce((total, item) => total + item.price * item.quantity, 0);
-};
 
 module.exports = {
   getCartByUserId,
