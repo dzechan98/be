@@ -58,7 +58,7 @@ const getAllUsers = async (req, res) => {
 
 const addUser = async (req, res) => {
   try {
-    const { name, password, image, phone, email, gender, address } = req.body;
+    const { name, password, image, email } = req.body;
 
     if (!name || !password || !image || !email) {
       return res.status(400).json({

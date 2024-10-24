@@ -6,13 +6,31 @@ const orderItemSchema = new mongoose.Schema({
     ref: "Product",
     required: true,
   },
-  quantity: { type: Number, required: true },
-  price: { type: Number, required: true },
+  title: {
+    type: String,
+    required: true,
+  },
+  color: {
+    type: String,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+  image_thumbnail: {
+    type: String,
+    required: true,
+  },
 });
 
 const orderSchema = new mongoose.Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -21,7 +39,8 @@ const orderSchema = new mongoose.Schema(
     totalPrice: { type: Number, required: true },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "paypal", "cash_on_delivery", "bank_transfer"],
+      enum: ["cash_on_delivery", "bank_transfer"],
+      default: "cash_on_delivery",
       required: true,
     },
     status: {
@@ -35,10 +54,9 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
     shippingAddress: {
-      fullName: { type: String, required: true },
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      phone: { type: Number, required: true },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
     },
     orderDate: { type: Date, default: Date.now },
     shippedDate: { type: Date },

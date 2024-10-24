@@ -15,12 +15,6 @@ const productSchema = new mongoose.Schema(
     color: { type: String },
     image_thumbnail: { type: String },
     images: { type: Array },
-    ratings: [
-      {
-        star: { type: Number },
-        postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      },
-    ],
   },
   {
     timestamps: true,
