@@ -101,7 +101,85 @@ const getOrdersByUser = (userId) =>
     }
   });
 
+const getAllOrder = (page, limit) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const orders = await Order.find({})
+        .populate("user")
+        .limit(limit)
+        .skip((page - 1) * limit);
+
+      const count = await Order.countDocuments();
+
+      resolve({
+        results: orders,
+        count,
+      });
+    } catch (error) {
+      reject("Lỗi khi nạp tất cả đơn hàng");
+    }
+  });
+
+const cancelOrder = async (orderId) => {
+  const session = await Order.startSession();
+  console.log(orderId);
+  try {
+    const result = await session.withTransaction(async () => {
+      const orderData = await Order.findByIdAndUpdate(
+        orderId,
+        { status: "canceled" },
+        { new: true, session }
+      );
+
+      if (!orderData) {
+        throw new Error(`Order with ID ${orderId} does not exist.`);
+      }
+
+      await Promise.all(
+        orderData.items.map(async (item) => {
+          const product = await Product.findById(item.productId).session(
+            session
+          );
+
+          if (!product) {
+            throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
+          }
+
+          product.sold -= item.quantity;
+          return product.save({ session });
+        })
+      );
+
+      return orderData;
+    });
+    return result;
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw new Error("Lỗi khi hủy đơn hàng: " + error.message);
+  } finally {
+    session.endSession();
+  }
+};
+
+const updateStatusOrder = (orderId, status) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        { status },
+        { new: true }
+      );
+
+      resolve(order);
+    } catch (error) {
+      reject("Lỗi khi cập nhật trạng thái  đơn hàng");
+    }
+  });
+
 module.exports = {
   createOrder,
   getOrdersByUser,
+  cancelOrder,
+  getAllOrder,
+  updateStatusOrder,
 };

@@ -48,11 +48,6 @@ const getAllProducts = async (req, res) => {
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    // console.log(queryStr);
-
-    // const categoryArray = Array.isArray(listCategories)
-    //   ? listCategories
-    //   : listCategories.split(",");
     const result = await productService.getAllProducts(
       page,
       limit,
