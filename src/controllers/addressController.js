@@ -1,4 +1,5 @@
 const addressService = require("../services/addressService");
+const errorHandler = require("../utils/errorHandler");
 
 const getAddress = async (req, res) => {
   try {
@@ -11,18 +12,7 @@ const getAddress = async (req, res) => {
     const result = await addressService.getAddress(addressId);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      error === "Địa chỉ không được xác định" ||
-      error === "Đã xảy ra lỗi khi tìm nạp địa chỉ"
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -41,9 +31,7 @@ const getAddressDefault = async (req, res) => {
 
     return res.status(200).json(result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Lỗi máy chủ khi tìm nạp địa chỉ mặc định" });
+    errorHandler(res, error);
   }
 };
 
@@ -58,18 +46,7 @@ const getManyAddresses = async (req, res) => {
     const result = await addressService.getManyAddresses(userId);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      error === "Không tìm thấy địa chỉ" ||
-      error === "Đã xảy ra lỗi khi tìm nạp địa chỉ"
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -79,7 +56,7 @@ const addAddress = async (req, res) => {
     const result = await addressService.addAddress(newAddress);
     return res.status(201).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Lỗi máy chủ khi thêm địa chỉ" });
+    errorHandler(res, error);
   }
 };
 
@@ -99,9 +76,7 @@ const updateAddress = async (req, res) => {
 
     return res.status(200).json(result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Lỗi máy chủ khi cập nhật địa chỉ" });
+    errorHandler(res, error);
   }
 };
 
@@ -116,7 +91,7 @@ const deleteAddress = async (req, res) => {
     const result = await addressService.deleteAddress(addressId);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Lỗi máy chủ khi xóa địa chỉ" });
+    errorHandler(res, error);
   }
 };
 

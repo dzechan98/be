@@ -1,16 +1,17 @@
 const Category = require("../models/categoryModel");
+const createResponse = require("../utils/createResponse");
 
 const getCategory = (categoryId) =>
   new Promise(async (resolve, reject) => {
     try {
       const category = await Category.findById(categoryId);
       if (!category) {
-        resolve({ message: "Danh mục không được xác định" });
+        return reject(createResponse(400, "Danh mục không được xác định"));
       }
 
-      resolve({ ...category.toObject() });
+      resolve(category);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp danh mục");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp danh mục"));
     }
   });
 
@@ -25,7 +26,7 @@ const getAllCategories = (page, limit) =>
 
       resolve({ results: listCategories, count });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp danh sách danh mục");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp danh mục"));
     }
   });
 
@@ -34,10 +35,9 @@ const addCategory = (newCategory) =>
     try {
       const createCategory = await Category.create({ ...newCategory });
 
-      resolve({ ...createCategory.toObject() });
+      resolve(createCategory);
     } catch (error) {
-      console.log(error);
-      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
+      reject(createResponse(400, "Đã xảy ra lỗi khi thêm danh mục"));
     }
   });
 
@@ -54,13 +54,12 @@ const updateCategory = (categoryId, body) =>
       );
 
       if (!category) {
-        return resolve("Danh mục không được xác định");
+        return reject(createResponse(400, "Danh mục không được xác định"));
       }
 
-      resolve({ ...category.toObject() });
+      resolve(category);
     } catch (error) {
-      console.log({ error });
-      reject("Đã xảy ra lỗi khi cập nhật danh mục");
+      reject(createResponse(400, "Đã xảy ra lỗi khi cập nhật danh mục"));
     }
   });
 
@@ -70,12 +69,12 @@ const deleteCategory = (categoryId) =>
       const category = await Category.findByIdAndDelete(categoryId);
 
       if (!category) {
-        return resolve({ message: "Danh mục không được xác định" });
+        return reject(createResponse(400, "Danh mục không được xác định"));
       }
 
-      resolve({ message: "Delete category success" });
+      resolve({ message: "Xóa danh mục thành công" });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xóa danh mục");
+      reject(createResponse(400, "Đã xảy ra lỗi khi xóa danh mục"));
     }
   });
 

@@ -41,42 +41,102 @@ const sendOrderConfirmationEmail = async (order) => {
   await transporter.sendMail(mailOptions);
 };
 
+// const createOrder = async (orderData) => {
+//   const session = await Order.startSession();
+
+//   try {
+//     const result = await session.withTransaction(async () => {
+//       await Promise.all(
+//         orderData.items.map(async (item) => {
+//           const product = await Product.findById(item.productId).session(
+//             session
+//           );
+
+//           if (!product) {
+//             throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
+//           }
+
+//           if (product.quantity - product.sold < item.quantity) {
+//             throw new Error(`Không đủ hàng cho sản phẩm: ${product.title}`);
+//           }
+
+//           product.sold += item.quantity;
+//           return product.save({ session });
+//         }),
+//       );
+
+//       const order = new Order(orderData);
+//       const savedOrder = await order.save({ session });
+//       const detailOrder = await savedOrder.populate("user");
+
+//       // await sendOrderConfirmationEmail(detailOrder);
+
+//       const productIds = orderData.items.map((item) => item.productId);
+//       // await Cart.findOneAndUpdate(
+//       //   { userId: orderData.user },
+//       //   { $pull: { items: { productId: { $in: productIds } } } },
+//       //   { session, new: true }
+//       // );
+
+//       await Promise.all([
+//         sendOrderConfirmationEmail(detailOrder),
+//         Cart.findOneAndUpdate(
+//           { userId: orderData.user },
+//           { $pull: { items: { productId: { $in: productIds } } } },
+//           { session, new: true }
+//         ),
+//       ]);
+
+//       return savedOrder;
+//     });
+
+//     return result;
+//   } catch (error) {
+//     console.error("Error creating order:", error);
+//     throw new Error("Lỗi khi tạo đơn hàng: " + error.message);
+//   } finally {
+//     session.endSession();
+//   }
+// };
+
 const createOrder = async (orderData) => {
   const session = await Order.startSession();
 
   try {
     const result = await session.withTransaction(async () => {
-      await Promise.all(
-        orderData.items.map(async (item) => {
-          const product = await Product.findById(item.productId).session(
-            session
-          );
+      const productIds = orderData.items.map((item) => item.productId);
 
-          if (!product) {
-            throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
-          }
+      const productUpdates = orderData.items.map(async (item) => {
+        const product = await Product.findById(item.productId).session(session);
 
-          if (product.quantity - product.sold < item.quantity) {
-            throw new Error(`Không đủ hàng cho sản phẩm: ${product.title}`);
-          }
+        if (!product) {
+          throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
+        }
 
-          product.sold += item.quantity;
-          return product.save({ session });
-        })
-      );
+        if (product.quantity - product.sold < item.quantity) {
+          throw new Error(`Không đủ hàng cho sản phẩm: ${product.title}`);
+        }
+
+        product.sold += item.quantity;
+        return product.save({ session });
+      });
 
       const order = new Order(orderData);
-      const savedOrder = await order.save({ session });
-      const detailOrder = await savedOrder.populate("user");
+      const [savedOrder] = await Promise.all([
+        order.save({ session }),
+        Promise.all(productUpdates),
+      ]);
 
-      await sendOrderConfirmationEmail(detailOrder);
+      const orderDetail = await savedOrder.populate("user");
 
-      const productIds = orderData.items.map((item) => item.productId);
-      await Cart.findOneAndUpdate(
-        { userId: orderData.user },
-        { $pull: { items: { productId: { $in: productIds } } } },
-        { session, new: true }
-      );
+      await Promise.all([
+        sendOrderConfirmationEmail(orderDetail),
+        Cart.findOneAndUpdate(
+          { userId: orderData.user },
+          { $pull: { items: { productId: { $in: productIds } } } },
+          { session, new: true }
+        ),
+      ]);
 
       return savedOrder;
     });
@@ -164,11 +224,10 @@ const cancelOrder = async (orderId) => {
 const updateStatusOrder = (orderId, status) =>
   new Promise(async (resolve, reject) => {
     try {
-      const order = await Order.findByIdAndUpdate(
-        orderId,
-        { status },
-        { new: true }
-      );
+      const data =
+        status === "delivered" ? { status, paymentStatus: "paid" } : { status };
+
+      const order = await Order.findByIdAndUpdate(orderId, data, { new: true });
 
       resolve(order);
     } catch (error) {

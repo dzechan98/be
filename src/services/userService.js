@@ -1,18 +1,18 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const createResponse = require("../utils/createResponse");
 
 const getUser = (userId) =>
   new Promise(async (resolve, reject) => {
     try {
       const user = await User.findById(userId);
       if (!user) {
-        resolve({ message: "Người dùng không được xác định" });
+        return reject(createResponse(400, "Người dùng không được xác định"));
       }
 
-      resolve({ ...user.toObject() });
+      resolve(user);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp người dùng");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp người dùng"));
     }
   });
 
@@ -31,39 +31,9 @@ const getAllUsers = (page, limit) =>
 
       resolve({ results: listUsers, count });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp danh sách người dùng");
-    }
-  });
-
-const login = ({ email, password }) =>
-  new Promise(async (resolve, reject) => {
-    try {
-      const user = await User.findOne({ email }).select("+password");
-
-      if (!user) {
-        return reject("Người dùng không được xác định");
-      }
-
-      const comparePassword = await bcrypt.compare(password, user.password);
-
-      if (!comparePassword) {
-        return reject("Mật khẩu không khớp");
-      }
-
-      const payload = {
-        id: user._id,
-        isAdmin: user.isAdmin,
-      };
-
-      const accessToken = generateToken(payload);
-      const refreshToken = generateToken(payload, "RT");
-
-      resolve({
-        accessToken,
-        refreshToken,
-      });
-    } catch (error) {
-      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
+      reject(
+        createResponse(400, "Đã xảy ra lỗi khi tìm nạp danh sách người dùng")
+      );
     }
   });
 
@@ -74,7 +44,7 @@ const addUser = (body) =>
       const checkUser = await User.findOne({ email });
 
       if (checkUser) {
-        return reject("Email đã được đăng ký");
+        return reject(createResponse(400, "Email đã được đăng ký"));
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -85,9 +55,9 @@ const addUser = (body) =>
         ...rest,
       });
 
-      resolve({ ...createdUser.toObject() });
+      resolve(createdUser);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
+      reject(createResponse(400, "Đã xảy ra lỗi khi xử lý yêu cầu"));
     }
   });
 
@@ -99,12 +69,12 @@ const updateUser = (userId, body) =>
       });
 
       if (!user) {
-        return resolve({ message: "Người dùng không được xác định" });
+        return reject(createResponse(400, "Người dùng không được xác định"));
       }
 
-      resolve({ ...user.toObject() });
+      resolve(user);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi cập nhật người dùng");
+      reject(createResponse(400, "Đã xảy ra lỗi khi cập nhật người dùng"));
     }
   });
 
@@ -114,12 +84,12 @@ const deleteUser = (userId) =>
       const user = await User.findByIdAndDelete(userId);
 
       if (!user) {
-        return resolve({ message: "Người dùng không được xác định" });
+        return reject(createResponse(400, "Người dùng không được xác định"));
       }
 
       resolve({ message: "Delete user success" });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xóa người dùng");
+      reject(createResponse(400, "Đã xảy ra lỗi khi xóa người dùng"));
     }
   });
 

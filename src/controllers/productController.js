@@ -1,4 +1,5 @@
 const productService = require("../services/productService");
+const errorHandler = require("../utils/errorHandler");
 
 const getProduct = async (req, res) => {
   try {
@@ -11,18 +12,7 @@ const getProduct = async (req, res) => {
     const result = await productService.getProduct(productId);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      error == "Sản phẩm không được xác định" ||
-      error == "Đã xảy ra lỗi khi tìm nạp sản phẩm"
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -60,7 +50,7 @@ const getAllProducts = async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: error });
+    errorHandler(res, error);
   }
 };
 
@@ -83,15 +73,7 @@ const addProduct = async (req, res) => {
     const result = await productService.addProduct(req.body);
     return res.status(201).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (error === "Đã xảy ra lỗi khi xử lý yêu cầu") {
-      statusCode = 400;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -120,18 +102,7 @@ const updateProduct = async (req, res) => {
     const result = await productService.updateProduct(productId, req.body);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      (error =
-        "Đã xảy ra lỗi khi cập nhật sản phẩm" ||
-        error == "Sản phẩm không được xác định")
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -146,17 +117,7 @@ const deleteProduct = async (req, res) => {
     const result = await productService.deleteProduct(productId);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      error == "Sản phẩm không được xác định" ||
-      error == "Đã xảy ra lỗi khi xóa sản phẩm"
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-    return res.status(500).json({ message });
+    errorHandler(res, error);
   }
 };
 

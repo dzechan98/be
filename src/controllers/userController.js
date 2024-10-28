@@ -1,4 +1,5 @@
 const userService = require("../services/userService");
+const errorHandler = require("../utils/errorHandler");
 
 const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
@@ -13,13 +14,7 @@ const getUser = async (req, res) => {
     const result = await userService.getUser(userId);
     return res.status(200).json(result);
   } catch (error) {
-    let message = "Lỗi máy chủ";
-    let statusCode = 500;
-    if (error == "Đã xảy ra lỗi khi tìm nạp người dùng") {
-      statusCode = 400;
-      message = error;
-    }
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -34,13 +29,7 @@ const getMe = async (req, res) => {
     const result = await userService.getUser(userId);
     return res.status(200).json(result);
   } catch (error) {
-    let message = "Lỗi máy chủ";
-    let statusCode = 500;
-    if (error == "Đã xảy ra lỗi khi tìm nạp người dùng") {
-      statusCode = 400;
-      message = error;
-    }
-    return res.status(statusCode).json(message);
+    errorHandler(res, error);
   }
 };
 
@@ -50,9 +39,7 @@ const getAllUsers = async (req, res) => {
     const result = await userService.getAllUsers(page, limit);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "Đã xảy ra lỗi khi tìm nạp danh sách người dùng",
-    });
+    errorHandler(res, error);
   }
 };
 
@@ -76,15 +63,7 @@ const addUser = async (req, res) => {
     const result = await userService.addUser(req.body);
     return res.status(201).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (error === "Email đã được đăng ký") {
-      statusCode = 409;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -101,9 +80,7 @@ const updateUser = async (req, res) => {
     const result = await userService.updateUser(userId, req.body);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "Đã xảy ra lỗi khi cập nhật người dùng",
-    });
+    errorHandler(res, error);
   }
 };
 
@@ -118,9 +95,7 @@ const deleteUser = async (req, res) => {
     const result = await userService.deleteUser(userId);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "Đã xảy ra lỗi khi xóa người dùng",
-    });
+    errorHandler(res, error);
   }
 };
 

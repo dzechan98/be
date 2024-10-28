@@ -1,5 +1,6 @@
 const Cart = require("../models/cartModel");
 const Product = require("../models/productModel");
+const createResponse = require("../utils/createResponse");
 
 const getCartByUserId = (userId) =>
   new Promise(async (resolve, reject) => {
@@ -10,7 +11,7 @@ const getCartByUserId = (userId) =>
       }
       resolve(cart);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp giỏ hàng");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp giỏ hàng"));
     }
   });
 
@@ -19,12 +20,12 @@ const addItemToCart = (userId, product) =>
     try {
       const dbProduct = await Product.findById(product.productId);
       if (!dbProduct) {
-        return reject("Không tìm thấy sản phẩm");
+        return reject(createResponse(400, "Không tìm thấy sản phẩm nào"));
       }
 
       const availableStock = dbProduct.quantity - dbProduct.sold;
       if (product.quantity > availableStock) {
-        return reject("Hàng có sẵn không đủ");
+        return reject(createResponse(400, "Hàng có sẵn không đủ"));
       }
 
       const cart = await getCartByUserId(userId);
@@ -35,7 +36,7 @@ const addItemToCart = (userId, product) =>
       if (existingItem) {
         existingItem.quantity += product.quantity;
         if (existingItem.quantity > availableStock) {
-          return reject("Hàng có sẵn không đủ");
+          return reject(createResponse(400, "Hàng có sẵn không đủ"));
         }
       } else {
         cart.items.push(product);
@@ -45,8 +46,9 @@ const addItemToCart = (userId, product) =>
 
       resolve(cart);
     } catch (error) {
-      console.log({ error });
-      reject("Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng");
+      reject(
+        createResponse(400, "Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng")
+      );
     }
   });
 
@@ -59,7 +61,7 @@ const decrementItemInCart = (userId, productId) =>
       );
 
       if (!existingItem) {
-        return reject("Không tìm thấy sản phẩm");
+        return reject(createResponse(400, "Không tìm thấy sản phẩm nào"));
       }
 
       if (existingItem.quantity === 1) {
@@ -72,7 +74,7 @@ const decrementItemInCart = (userId, productId) =>
 
       resolve(cart);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi giảm số lượng sản phẩm trong giỏ hàng");
+      reject(createResponse(400, "Đã xảy ra lỗi khi giảm số lượng sản phẩm"));
     }
   });
 
@@ -85,18 +87,18 @@ const incrementItemInCart = (userId, productId) =>
       );
 
       if (!existingItem) {
-        return reject("Không tìm thấy sản phẩm");
+        return reject(createResponse(400, "Không tìm thấy sản phẩm"));
       }
 
       const product = await Product.findById(productId);
       if (!product) {
-        return reject("Không tìm thấy sản phẩm");
+        return reject(createResponse(400, "Không tìm thấy sản phẩm"));
       }
 
       const availableStock = product.quantity - product.sold;
 
       if (existingItem.quantity + 1 > availableStock) {
-        return reject("Số lượng yêu cầu vượt quá tồn kho");
+        return reject(createResponse(400, "Số lượng yêu cầu vượt quá tồn kho"));
       }
 
       existingItem.quantity += 1;
@@ -104,7 +106,12 @@ const incrementItemInCart = (userId, productId) =>
 
       resolve(cart);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tăng số lượng sản phẩm trong giỏ hàng");
+      reject(
+        createResponse(
+          400,
+          "Đã xảy ra lỗi khi tăng số lượng sản phẩm trong giỏ hàng"
+        )
+      );
     }
   });
 
@@ -125,7 +132,9 @@ const removeItemFromCart = (userId, productId) =>
 
       resolve(cart);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xóa sản phẩm khỏi giỏ hàng");
+      reject(
+        createResponse(400, "Đã xảy ra lỗi khi xóa sản phẩm khỏi giỏ hàng")
+      );
     }
   });
 
@@ -140,7 +149,7 @@ const clearCart = (userId) =>
 
       resolve(cart);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xóa giỏ hàng");
+      reject(createResponse(400, "Đã xảy ra lỗi khi xóa giỏ hàng"));
     }
   });
 

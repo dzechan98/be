@@ -1,16 +1,17 @@
 const Product = require("../models/productModel");
+const createResponse = require("../utils/createResponse");
 
 const getProduct = (productId) =>
   new Promise(async (resolve, reject) => {
     try {
       const product = await Product.findById(productId).populate("category");
       if (!product) {
-        return reject("Sản phẩm không được xác định");
+        return reject(createResponse(400, "Sản phẩm không được xác định"));
       }
 
-      resolve({ ...product.toObject() });
+      resolve(product);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp sản phẩm");
+      reject(createResponse(400, "Đã có lỗi xảy ra khi tìm nạp sản phẩm"));
     }
   });
 
@@ -48,7 +49,7 @@ const getAllProducts = (
       resolve({ results: listProducts, count });
     } catch (error) {
       console.log(error);
-      reject("An error occurred while fetching the products");
+      reject(createResponse(400, "Đã có lỗi xảy ra khi tìm nạp sản phẩm"));
     }
   });
 
@@ -61,9 +62,9 @@ const addProduct = (newProduct) =>
 
       const product = await createProduct.populate("category");
 
-      resolve({ ...product.toObject() });
+      resolve(product);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
+      reject(createResponse(400, "Đã xảy ra lỗi khi thêm sản phẩm"));
     }
   });
 
@@ -75,14 +76,12 @@ const updateProduct = (productId, body) =>
       }).populate("category");
 
       if (!product) {
-        return reject("Sản phẩm không được xác định");
+        return reject(createResponse(400, "Sản phẩm không được xác định"));
       }
 
-      resolve({
-        ...product.toObject(),
-      });
+      resolve(product);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi cập nhật sản phẩm");
+      reject(createResponse(400, "Đã xảy ra lỗi khi cập nhật sản phẩm"));
     }
   });
 
@@ -92,12 +91,12 @@ const deleteProduct = (productId) =>
       const product = await Product.findByIdAndDelete(productId);
 
       if (!product) {
-        return reject("Sản phẩm không được xác định");
+        return reject(createResponse(400, "Sản phẩm không được xác định"));
       }
 
-      resolve({ message: "Delete product success" });
+      resolve({ message: "Xóa sản phẩm thành công" });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xóa sản phẩm");
+      reject(createResponse(400, "Đã xảy ra lỗi khi xóa sản phẩm"));
     }
   });
 

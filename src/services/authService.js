@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const createResponse = require("../utils/createResponse");
 
 const generateToken = (data, type = "AT") => {
   const secretKey =
@@ -21,7 +22,7 @@ const register = (body) =>
       const checkUser = await User.findOne({ email });
 
       if (checkUser) {
-        return reject("Email đã được đăng ký");
+        return reject(createResponse(400, "Email đã được đăng ký"));
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -42,7 +43,7 @@ const register = (body) =>
 
       resolve({ accessToken, refreshToken });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
+      reject(createResponse(400, "Đã xảy ra lỗi khi đăng ký tài khoản"));
     }
   });
 
@@ -52,13 +53,13 @@ const login = ({ email, password }) =>
       const user = await User.findOne({ email }).select("+password");
 
       if (!user) {
-        return reject("Người dùng không được xác định");
+        return reject(createResponse(400, "Người dùng không được xác định"));
       }
 
       const comparePassword = await bcrypt.compare(password, user.password);
 
       if (!comparePassword) {
-        return reject("Mật khẩu không khớp");
+        return reject(createResponse(400, "Mật khẩu không khớp"));
       }
 
       const payload = {
@@ -74,7 +75,7 @@ const login = ({ email, password }) =>
         refreshToken,
       });
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xử lý yêu cầu");
+      reject(createResponse(400, "Đã xảy ra lỗi khi đăng nhập"));
     }
   });
 
@@ -82,7 +83,9 @@ const refreshToken = (refreshToken) =>
   new Promise(async (resolve, reject) => {
     jwt.verify(refreshToken, process.env.JWT_RT_SECRET_KEY, (err, decode) => {
       if (err) {
-        return reject("Refresh token có thể hết hạn hoặc không hợp lệ");
+        return reject(
+          createResponse(400, "Refresh token có thể hết hạn hoặc không hợp lệ")
+        );
       }
 
       const accessToken = generateToken({

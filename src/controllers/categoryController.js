@@ -1,4 +1,5 @@
 const categoryService = require("../services/categoryService");
+const errorHandler = require("../utils/errorHandler");
 
 const getCategory = async (req, res) => {
   try {
@@ -11,18 +12,7 @@ const getCategory = async (req, res) => {
     const result = await categoryService.getCategory(categoryId);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      error == "Danh mục không được xác định" ||
-      error == "Đã xảy ra lỗi khi tìm nạp danh mục"
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -32,9 +22,7 @@ const getAllCategories = async (req, res) => {
     const result = await categoryService.getAllCategories(page, limit);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({
-      message: "Đã xảy ra lỗi khi tìm nạp danh sách danh mục",
-    });
+    errorHandler(res, error);
   }
 };
 
@@ -51,15 +39,7 @@ const addCategory = async (req, res) => {
     const result = await categoryService.addCategory({ title, image_url });
     return res.status(201).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (error === "Đã xảy ra lỗi khi xử lý yêu cầu") {
-      statusCode = 400;
-      message = error;
-    }
-
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -74,18 +54,7 @@ const updateCategory = async (req, res) => {
     const result = await categoryService.updateCategory(categoryId, req.body);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      (error =
-        "Đã xảy ra lỗi khi cập nhật danh mục" ||
-        error == "Danh mục không được xác định")
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-    return res.status(statusCode).json({ message });
+    errorHandler(res, error);
   }
 };
 
@@ -100,17 +69,7 @@ const deleteCategory = async (req, res) => {
     const result = await categoryService.deleteCategory(categoryId);
     return res.status(200).json(result);
   } catch (error) {
-    let statusCode = 500;
-    let message = "Lỗi máy chủ";
-
-    if (
-      error == "Danh mục không được xác định" ||
-      error == "Đã xảy ra lỗi khi xóa danh mục"
-    ) {
-      statusCode = 400;
-      message = error;
-    }
-    return res.status(500).json({ message });
+    errorHandler(res, error);
   }
 };
 

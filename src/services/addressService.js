@@ -1,16 +1,17 @@
 const Address = require("../models/addressModel");
+const createResponse = require("../utils/createResponse");
 
 const getAddress = (addressId) =>
   new Promise(async (resolve, reject) => {
     try {
       const address = await Address.findById(addressId);
       if (!address) {
-        resolve({ message: "Địa chỉ không được xác định" });
+        reject(createResponse(400, "Địa chỉ không được xác định"));
       } else {
-        resolve({ ...address.toObject() });
+        resolve(address);
       }
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp địa chỉ");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp địa chỉ"));
     }
   });
 
@@ -20,12 +21,12 @@ const getAddressDefault = (userId) =>
       const address = await Address.findOne({ userId, isDefault: true });
 
       if (!address) {
-        resolve({ message: "Không tìm thấy địa chỉ mặc định" });
+        reject(createResponse(400, "Không tìm thấy địa chỉ mặc định"));
       } else {
-        resolve({ ...address.toObject() });
+        resolve(address);
       }
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp địa chỉ mặc định");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp địa chỉ mặc định"));
     }
   });
 
@@ -36,12 +37,12 @@ const getManyAddresses = (userId) =>
       const count = await Address.countDocuments();
 
       if (!addresses || addresses.length === 0) {
-        resolve({ message: "Không tìm thấy địa chỉ" });
+        reject(createResponse(400, "Không tìm thấy địa chỉ"));
       } else {
         resolve({ results: addresses, count });
       }
     } catch (error) {
-      reject("Đã xảy ra lỗi khi tìm nạp địa chỉ");
+      reject(createResponse(400, "Đã xảy ra lỗi khi tìm nạp địa chỉ"));
     }
   });
 
@@ -60,9 +61,9 @@ const addAddress = (newAddress) =>
       const address = new Address(newAddress);
 
       const savedAddress = await address.save();
-      resolve({ ...savedAddress.toObject() });
+      resolve(savedAddress);
     } catch (error) {
-      reject("Đã xảy ra lỗi khi thêm địa chỉ");
+      reject(createResponse(400, "Đã xảy ra lỗi khi thêm địa chỉ"));
     }
   });
 
@@ -83,12 +84,12 @@ const updateAddress = (addressId, updatedData) =>
       });
 
       if (!address) {
-        resolve({ message: "Địa chỉ không được xác định" });
+        reject(createResponse(400, "Địa chỉ không được xác định"));
       } else {
-        resolve({ ...address.toObject() });
+        resolve(address);
       }
     } catch (error) {
-      reject("Đã xảy ra lỗi khi cập nhật địa chỉ");
+      reject(createResponse(400, "Đã xảy ra lỗi khi cập nhật địa chỉ"));
     }
   });
 
@@ -97,12 +98,12 @@ const deleteAddress = (addressId) =>
     try {
       const address = await Address.findByIdAndDelete(addressId);
       if (!address) {
-        resolve({ message: "Địa chỉ không được xác định" });
+        reject(createResponse(400, "Địa chỉ không được xác định"));
       } else {
         resolve({ message: "Đã xóa địa chỉ thành công" });
       }
     } catch (error) {
-      reject("Đã xảy ra lỗi khi xóa địa chỉ");
+      reject(createResponse(400, "Đã xảy ra lỗi khi xóa địa chỉ"));
     }
   });
 
