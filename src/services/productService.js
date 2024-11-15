@@ -15,17 +15,19 @@ const getProduct = (productId) =>
     }
   });
 
-const getAllProducts = (
-  page,
-  limit,
-  filter,
-  sortPrice,
-  title,
-  listCategories
-) =>
+const getAllProducts = (body) =>
   new Promise(async (resolve, reject) => {
-    const { id, ...rest } = JSON.parse(filter);
-    let input = id ? { _id: { $ne: id }, ...rest } : { ...rest };
+    const {
+      page = 1,
+      limit = 10,
+      title,
+      listCategories,
+      id,
+      sortBy = "sold",
+      sortOrder = "desc",
+    } = body;
+
+    let input = id ? { _id: { $ne: id } } : {};
 
     input = title
       ? { ...input, title: { $regex: title, $options: "i" } }
@@ -35,16 +37,14 @@ const getAllProducts = (
       ? { ...input, category: { $in: listCategories.split(",") } }
       : input;
 
-    const sort = sortPrice ? { price: sortPrice } : { createdAt: -1 };
-
     try {
       const listProducts = await Product.find(input)
         .populate("category")
-        .sort(sort)
+        .sort({ [sortBy]: sortOrder })
         .limit(limit)
         .skip((page - 1) * limit);
 
-      const count = await Product.find(input).countDocuments();
+      const count = await Product.countDocuments(input);
 
       resolve({ results: listProducts, count });
     } catch (error) {

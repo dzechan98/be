@@ -18,34 +18,7 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      sortPrice,
-      title,
-      listCategories,
-    } = req.query;
-    const queryObj = { ...req.query };
-    const excludeFields = [
-      "page",
-      "limit",
-      "title",
-      "sortPrice",
-      "listCategories",
-    ];
-    excludeFields.forEach((item) => delete queryObj[item]);
-
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    const result = await productService.getAllProducts(
-      page,
-      limit,
-      queryStr,
-      sortPrice,
-      title,
-      listCategories
-    );
+    const result = await productService.getAllProducts(req.query);
 
     return res.status(200).json(result);
   } catch (error) {
