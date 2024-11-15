@@ -48,7 +48,6 @@ const getAllProducts = (
 
       resolve({ results: listProducts, count });
     } catch (error) {
-      console.log(error);
       reject(createResponse(400, "Đã có lỗi xảy ra khi tìm nạp sản phẩm"));
     }
   });

@@ -7,6 +7,10 @@ router.get("/", verifyToken, isAdmin, orderController.getAllOrder);
 router.get("/user", verifyToken, orderController.getOrdersByUser);
 router.post("/", verifyToken, orderController.createOrder);
 router.put("/cancel-order", verifyToken, orderController.cancelOrder);
-router.put("/:id", verifyToken, orderController.updateStatusOrder);
+router.put(
+  "/update-status/:id",
+  verifyToken,
+  orderController.updateStatusOrder
+);
 
 module.exports = router;

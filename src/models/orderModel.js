@@ -36,6 +36,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     items: [orderItemSchema],
+    shippingFee: { type: Number, default: 0 },
     totalPrice: { type: Number, required: true },
     paymentMethod: {
       type: String,
@@ -62,6 +63,7 @@ const orderSchema = new mongoose.Schema(
     shippedDate: { type: Date },
     deliveredDate: { type: Date },
     canceledDate: { type: Date },
+    orderCode: { type: String, unique: true },
   },
   {
     timestamps: true,

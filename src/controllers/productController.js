@@ -49,7 +49,6 @@ const getAllProducts = async (req, res) => {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.log(error);
     errorHandler(res, error);
   }
 };

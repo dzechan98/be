@@ -17,8 +17,8 @@ const sendOrderConfirmationEmail = async (order) => {
   const mailOptions = {
     from: "VStore",
     to: order.user.email,
-    subject: `Đặt hàng thành công - Mã đơn hàng: #${order._id}`,
-    text: `Cảm ơn bạn đã đặt hàng!\n\Đặt hàng ID: ${order._id}\nTổng giá: ${order.totalPrice}\nTrạng thái: ${order.status}`,
+    subject: `Đặt hàng thành công - Mã đơn hàng: #${order.orderCode}`,
+    text: `Cảm ơn bạn đã đặt hàng!\n\Đặt hàng ID: ${order.orderCode}`,
     html: `<html>
       <body>
         <h1>Đặt hàng thành công</h1>
@@ -29,86 +29,45 @@ const sendOrderConfirmationEmail = async (order) => {
         <ul>
           ${itemsList}
         </ul>
-        <p><strong>Tổng:</strong> ${order.totalPrice.toLocaleString(
+        <p><strong>Phí vận chuyển:</strong> ${order.shippingFee.toLocaleString(
           "vi-VN"
         )} VNĐ</p>
+        <p>
+        <p><strong>Tổng:</strong> ${(
+          order.totalPrice + order.shippingFee
+        ).toLocaleString("vi-VN")} VNĐ</p>
         <p>Chúng tôi sẽ thông báo cho bạn khi đơn hàng của bạn đã được chuyển đi.</p>
         <p>Cảm ơn bạn đã mua sắm với chúng tôi!</p>
       </body>
     </html>`,
   };
-
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 };
 
-// const createOrder = async (orderData) => {
-//   const session = await Order.startSession();
+const generateOrderCode = async (session) => {
+  const lastOrder = await Order.findOne({})
+    .sort({ createdAt: -1 })
+    .session(session);
 
-//   try {
-//     const result = await session.withTransaction(async () => {
-//       await Promise.all(
-//         orderData.items.map(async (item) => {
-//           const product = await Product.findById(item.productId).session(
-//             session
-//           );
+  const lastOrderNumber = lastOrder
+    ? parseInt(lastOrder.orderCode.slice(2))
+    : 0;
 
-//           if (!product) {
-//             throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
-//           }
-
-//           if (product.quantity - product.sold < item.quantity) {
-//             throw new Error(`Không đủ hàng cho sản phẩm: ${product.title}`);
-//           }
-
-//           product.sold += item.quantity;
-//           return product.save({ session });
-//         }),
-//       );
-
-//       const order = new Order(orderData);
-//       const savedOrder = await order.save({ session });
-//       const detailOrder = await savedOrder.populate("user");
-
-//       // await sendOrderConfirmationEmail(detailOrder);
-
-//       const productIds = orderData.items.map((item) => item.productId);
-//       // await Cart.findOneAndUpdate(
-//       //   { userId: orderData.user },
-//       //   { $pull: { items: { productId: { $in: productIds } } } },
-//       //   { session, new: true }
-//       // );
-
-//       await Promise.all([
-//         sendOrderConfirmationEmail(detailOrder),
-//         Cart.findOneAndUpdate(
-//           { userId: orderData.user },
-//           { $pull: { items: { productId: { $in: productIds } } } },
-//           { session, new: true }
-//         ),
-//       ]);
-
-//       return savedOrder;
-//     });
-
-//     return result;
-//   } catch (error) {
-//     console.error("Error creating order:", error);
-//     throw new Error("Lỗi khi tạo đơn hàng: " + error.message);
-//   } finally {
-//     session.endSession();
-//   }
-// };
+  const newOrderNumber = lastOrderNumber + 1;
+  return `VD${newOrderNumber.toString().padStart(10, "0")}`;
+};
 
 const createOrder = async (orderData) => {
   const session = await Order.startSession();
 
   try {
     const result = await session.withTransaction(async () => {
-      const productIds = orderData.items.map((item) => item.productId);
-
       const productUpdates = orderData.items.map(async (item) => {
         const product = await Product.findById(item.productId).session(session);
-
         if (!product) {
           throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
         }
@@ -117,33 +76,40 @@ const createOrder = async (orderData) => {
           throw new Error(`Không đủ hàng cho sản phẩm: ${product.title}`);
         }
 
-        product.sold += item.quantity;
         return product.save({ session });
       });
 
-      const order = new Order(orderData);
-      const [savedOrder] = await Promise.all([
-        order.save({ session }),
-        Promise.all(productUpdates),
-      ]);
+      await Promise.all(productUpdates);
+
+      const orderCode = await generateOrderCode(session);
+      const order = new Order({ ...orderData, orderCode });
+      const savedOrder = await order.save({ session });
 
       const orderDetail = await savedOrder.populate("user");
 
-      await Promise.all([
-        sendOrderConfirmationEmail(orderDetail),
-        Cart.findOneAndUpdate(
-          { userId: orderData.user },
-          { $pull: { items: { productId: { $in: productIds } } } },
-          { session, new: true }
-        ),
-      ]);
-
-      return savedOrder;
+      return orderDetail;
     });
+
+    await Promise.all([
+      sendOrderConfirmationEmail(result),
+      Cart.findOneAndUpdate(
+        { userId: orderData.user },
+        {
+          $pull: {
+            items: {
+              productId: { $in: orderData.items.map((item) => item.productId) },
+            },
+          },
+        },
+        { new: true }
+      ),
+    ]);
 
     return result;
   } catch (error) {
-    console.error("Error creating order:", error);
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     throw new Error("Lỗi khi tạo đơn hàng: " + error.message);
   } finally {
     session.endSession();
@@ -166,6 +132,7 @@ const getAllOrder = (page, limit) =>
     try {
       const orders = await Order.find({})
         .populate("user")
+        .populate("shippingAddress")
         .limit(limit)
         .skip((page - 1) * limit);
 
@@ -182,39 +149,18 @@ const getAllOrder = (page, limit) =>
 
 const cancelOrder = async (orderId) => {
   const session = await Order.startSession();
-  console.log(orderId);
   try {
     const result = await session.withTransaction(async () => {
       const orderData = await Order.findByIdAndUpdate(
         orderId,
-        { status: "canceled" },
+        { status: "canceled", canceledDate: new Date() },
         { new: true, session }
-      );
-
-      if (!orderData) {
-        throw new Error(`Order with ID ${orderId} does not exist.`);
-      }
-
-      await Promise.all(
-        orderData.items.map(async (item) => {
-          const product = await Product.findById(item.productId).session(
-            session
-          );
-
-          if (!product) {
-            throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
-          }
-
-          product.sold -= item.quantity;
-          return product.save({ session });
-        })
       );
 
       return orderData;
     });
     return result;
   } catch (error) {
-    console.error("Error creating order:", error);
     throw new Error("Lỗi khi hủy đơn hàng: " + error.message);
   } finally {
     session.endSession();
@@ -225,13 +171,33 @@ const updateStatusOrder = (orderId, status) =>
   new Promise(async (resolve, reject) => {
     try {
       const data =
-        status === "delivered" ? { status, paymentStatus: "paid" } : { status };
+        status === "delivered"
+          ? { status, paymentStatus: "paid", deliveredDate: new Date() }
+          : { status };
 
       const order = await Order.findByIdAndUpdate(orderId, data, { new: true });
 
+      if (status === "delivered") {
+        await Promise.all(
+          order.items.map(async (item) => {
+            const product = await Product.findById(item.productId);
+
+            if (!product) {
+              throw new Error(
+                `Sản phẩm với ID ${item.productId} không tồn tại`
+              );
+            }
+
+            product.sold += item.quantity;
+            return product.save();
+          })
+        );
+      }
+
       resolve(order);
     } catch (error) {
-      reject("Lỗi khi cập nhật trạng thái  đơn hàng");
+      console.log(error);
+      reject("Lỗi khi cập nhật trạng thái đơn hàng");
     }
   });
 

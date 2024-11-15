@@ -1,4 +1,5 @@
 const orderService = require("../services/orderService");
+const errorHandler = require("../utils/errorHandler");
 
 const createOrder = async (req, res) => {
   try {
@@ -12,8 +13,7 @@ const createOrder = async (req, res) => {
 
     return res.status(201).json(result);
   } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ message: error.message });
+    errorHandler(res, error);
   }
 };
 
@@ -22,7 +22,7 @@ const getOrdersByUser = async (req, res) => {
     const result = await orderService.getOrdersByUser(req.user.id);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: error });
+    errorHandler(res, error);
   }
 };
 
@@ -32,7 +32,7 @@ const getAllOrder = async (req, res) => {
     const result = await orderService.getAllOrder(page, limit);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: error });
+    errorHandler(res, error);
   }
 };
 
@@ -41,8 +41,7 @@ const cancelOrder = async (req, res) => {
     const result = await orderService.cancelOrder(req.body.orderId);
     return res.status(200).json(result);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    errorHandler(res, error);
   }
 };
 
@@ -55,7 +54,7 @@ const updateStatusOrder = async (req, res) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    errorHandler(res, error);
   }
 };
 
