@@ -99,8 +99,34 @@ const refreshToken = (refreshToken) =>
     });
   });
 
+const changePassword = ({ newPassword, userId }) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return reject(createResponse(400, "Người dùng không được xác định"));
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(newPassword, salt);
+
+      user.password = hashPassword;
+
+      console.log({ user, newPassword });
+      await user.save();
+
+      resolve({
+        message: "Đổi mật khẩu thành công",
+      });
+    } catch (error) {
+      reject(createResponse(400, "Đã có lỗi xảy ra khi đổi mật khẩu"));
+    }
+  });
+
 module.exports = {
   register,
   login,
   refreshToken,
+  changePassword,
 };

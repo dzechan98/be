@@ -64,8 +64,26 @@ const refreshToken = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const { newPassword } = req.body;
+    const { userId } = req.query;
+
+    if (userId !== id) {
+      return errorHandler(res, {
+        message: "Không đủ quyền để thực hiện yêu cầu này",
+      });
+    }
+    const response = await authService.changePassword({ newPassword, userId });
+    return res.status(200).json(response);
+  } catch (error) {
+    errorHandler(res, error);
+  }
+};
 module.exports = {
   register,
   login,
   refreshToken,
+  changePassword,
 };
