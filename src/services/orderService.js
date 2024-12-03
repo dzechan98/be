@@ -24,7 +24,7 @@ const sendOrderConfirmationEmail = async (order) => {
         <h1>Đặt hàng thành công</h1>
         <p>Dear ${order.user.name}</p>
         <p>Cảm ơn bạn đã đặt hàng. Dưới đây là chi tiết đơn hàng:</p>
-        <p><strong>Mã đơn hàng:</strong> ${order._id}</p>
+        <p><strong>Mã đơn hàng:</strong> ${order.orderCode}</p>
         <h2>Sản phẩm:</h2>
         <ul>
           ${itemsList}
@@ -119,7 +119,9 @@ const createOrder = async (orderData) => {
 const getOrdersByUser = (userId) =>
   new Promise(async (resolve, reject) => {
     try {
-      const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+      const orders = await Order.find({ user: userId })
+        .populate("shippingAddress")
+        .sort({ createdAt: -1 });
 
       resolve(orders);
     } catch (error) {
@@ -173,7 +175,7 @@ const updateStatusOrder = (orderId, status) =>
       const data =
         status === "delivered"
           ? { status, paymentStatus: "paid", deliveredDate: new Date() }
-          : { status };
+          : { status, shippedDate: new Date() };
 
       const order = await Order.findByIdAndUpdate(orderId, data, { new: true });
 

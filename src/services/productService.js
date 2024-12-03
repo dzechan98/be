@@ -23,8 +23,8 @@ const getAllProducts = (body) =>
       title,
       listCategories,
       id,
-      sortBy = "sold",
-      sortOrder = "desc",
+      sortBy,
+      sortOrder,
     } = body;
 
     let input = id ? { _id: { $ne: id } } : {};
@@ -38,11 +38,19 @@ const getAllProducts = (body) =>
       : input;
 
     try {
-      const listProducts = await Product.find(input)
-        .populate("category")
-        .sort({ [sortBy]: sortOrder })
-        .limit(limit)
-        .skip((page - 1) * limit);
+      let listProducts;
+      if (sortBy && sortOrder) {
+        listProducts = await Product.find(input)
+          .populate("category")
+          .limit(limit)
+          .skip((page - 1) * limit)
+          .sort({ [sortBy]: sortOrder });
+      } else {
+        listProducts = await Product.find(input)
+          .populate("category")
+          .limit(limit)
+          .skip((page - 1) * limit);
+      }
 
       const count = await Product.countDocuments(input);
 

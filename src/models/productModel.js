@@ -12,7 +12,6 @@ const productSchema = new mongoose.Schema(
     },
     sold: { type: Number, default: 0 },
     quantity: { type: Number, required: true },
-    color: { type: String },
     image_thumbnail: { type: String },
     images: { type: Array },
   },
